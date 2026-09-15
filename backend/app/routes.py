@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.analyzer import AnalysisInput, AnalysisReport, analyze_response
 from app.models import ApiRequest, ApiResponse
 from app.transport import ExecutionDisabledError, RequestExecutor, get_request_executor
 
@@ -18,3 +19,8 @@ async def send_request(request: ApiRequest, executor: Executor) -> ApiResponse:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Outbound requests are disabled until SSRF protections are enabled.",
         ) from error
+
+
+@router.post("/analyze", response_model=AnalysisReport)
+async def analyze_api_response(data: AnalysisInput) -> AnalysisReport:
+    return analyze_response(data)
